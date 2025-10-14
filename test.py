@@ -160,6 +160,7 @@ def symmetric_encryption_ui():
             except Exception:
                 st.error("Decryption failed! Possibly wrong key or invalid ciphertext.")
 
+
 def asymmetric_encryption_ui():
     st.subheader("🔐 Asymmetric Encryption (RSA)")
 
@@ -197,6 +198,7 @@ def asymmetric_encryption_ui():
         except Exception:
             st.error("Invalid encrypted data format.")
 
+
 def hybrid_encryption_ui():
     st.subheader("🧩 Hybrid Encryption")
 
@@ -222,20 +224,9 @@ def hybrid_encryption_ui():
         st.success("✅ Encrypted Data:")
         st.json(encrypted_data)
 
-        # Add separate copy button for the JSON data with JS copy-to-clipboard
+        # Just display the JSON (no copy button)
         encrypted_json = json.dumps(encrypted_data, indent=2)
-        copy_button = st.button("Copy Encrypted Data JSON", key="hybrid_copy_json")
         st.code(encrypted_json, language="json")
-        '''if copy_button:
-            st.markdown(
-                f"""
-                <script>
-                navigator.clipboard.writeText({json.dumps(encrypted_json)});
-                </script>
-                <span style="color:green">Copied to clipboard!</span>
-                """,
-                unsafe_allow_html=True,
-            )'''
 
     encrypted_input = st.text_area("Paste Encrypted JSON:", key="hybrid_inp")
     decrypt_clicked = st.button("Hybrid Decrypt", key="hybrid_decrypt")
@@ -249,6 +240,7 @@ def hybrid_encryption_ui():
         except Exception:
             st.error("Invalid JSON or decryption error.")
 
+
 # --- MAIN DRIVER ---
 if mode == "Symmetric Encryption":
     symmetric_encryption_ui()
@@ -256,6 +248,3 @@ elif mode == "Asymmetric Encryption (RSA)":
     asymmetric_encryption_ui()
 else:
     hybrid_encryption_ui()
-
-
-
