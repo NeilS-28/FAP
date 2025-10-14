@@ -65,11 +65,12 @@ def main():
         st.session_state.hybrid_keys = None
 
     if encryption_type == "Symmetric Encryption":
-        symmetric_encryption_ui()
+#         symmetric_encryption_ui()
     elif encryption_type == "Asymmetric Encryption (RSA)":
         asymmetric_encryption_ui()
     else:
         hybrid_encryption_ui()
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
+
