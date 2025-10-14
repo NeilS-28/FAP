@@ -133,30 +133,36 @@ mode = st.sidebar.selectbox("Select encryption method:", ["Symmetric Encryption"
 def symmetric_encryption_ui():
     st.subheader("🔑 Symmetric Encryption (XOR)")
 
-    st.markdown("**Enter Secret Key:**")
-    key = st.text_input("", key="sym_key", type="password", help="Type your secret key here")
+    st.markdown("**Enter Secret Key (for Encryption):**")
+    key_encrypt = st.text_input("", key="sym_key_encrypt", type="password", help="Type your secret key here for encryption")
     st.markdown("**Enter Message:**")
     message = st.text_area("", key="sym_msg")
+
+    st.markdown("---")
+    st.markdown("**Enter Secret Key (for Decryption):**")
+    key_decrypt = st.text_input("", key="sym_key_decrypt", type="password", help="Type your secret key here for decryption")
+    st.markdown("**Enter Encrypted Message (Ciphertext):**")
+    ciphertext = st.text_area("", key="sym_ciphertext", help="Paste your encrypted message here to decrypt")
 
     encrypt_clicked = st.button("Encrypt", key="sym_encrypt")
     decrypt_clicked = st.button("Decrypt", key="sym_decrypt")
 
     if encrypt_clicked:
-        if not key or not message:
-            st.error("Please enter both key and message.")
+        if not key_encrypt or not message:
+            st.error("Please enter both secret key (encryption) and message.")
         else:
-            cipher = SimpleSymmetricEncryption(key)
+            cipher = SimpleSymmetricEncryption(key_encrypt)
             encrypted = cipher.encrypt(message)
             st.success("✅ Encrypted Message:")
             st.code(encrypted, language="text")
 
     if decrypt_clicked:
-        if not key or not message:
-            st.error("Please enter both key and ciphertext.")
+        if not key_decrypt or not ciphertext:
+            st.error("Please enter both secret key (decryption) and ciphertext.")
         else:
-            cipher = SimpleSymmetricEncryption(key)
+            cipher = SimpleSymmetricEncryption(key_decrypt)
             try:
-                decrypted = cipher.decrypt(message)
+                decrypted = cipher.decrypt(ciphertext)
                 st.success("✅ Decrypted Message:")
                 st.code(decrypted, language="text")
             except Exception:
