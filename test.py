@@ -197,7 +197,7 @@ def asymmetric_encryption_ui():
         except Exception:
             st.error("Invalid encrypted data format.")
 
-'''def hybrid_encryption_ui():
+def hybrid_encryption_ui():
     st.subheader("🧩 Hybrid Encryption")
 
     if "hybrid_public_key" not in st.session_state or "hybrid_private_key" not in st.session_state:
@@ -226,7 +226,7 @@ def asymmetric_encryption_ui():
         encrypted_json = json.dumps(encrypted_data, indent=2)
         copy_button = st.button("Copy Encrypted Data JSON", key="hybrid_copy_json")
         st.code(encrypted_json, language="json")
-        if copy_button:
+        '''if copy_button:
             st.markdown(
                 f"""
                 <script>
@@ -235,7 +235,7 @@ def asymmetric_encryption_ui():
                 <span style="color:green">Copied to clipboard!</span>
                 """,
                 unsafe_allow_html=True,
-            )
+            )'''
 
     encrypted_input = st.text_area("Paste Encrypted JSON:", key="hybrid_inp")
     decrypt_clicked = st.button("Hybrid Decrypt", key="hybrid_decrypt")
@@ -247,7 +247,7 @@ def asymmetric_encryption_ui():
             st.success("✅ Decrypted Message:")
             st.code(decrypted, language="text")
         except Exception:
-            st.error("Invalid JSON or decryption error.")'''
+            st.error("Invalid JSON or decryption error."
 
 # --- MAIN DRIVER ---
 if mode == "Symmetric Encryption":
@@ -256,4 +256,5 @@ elif mode == "Asymmetric Encryption (RSA)":
     asymmetric_encryption_ui()
 else:
     hybrid_encryption_ui()
+
 
