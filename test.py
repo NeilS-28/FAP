@@ -129,36 +129,81 @@ st.markdown("<h1 style='text-align:center;color:#1f77b4;'>🔐 Encryption & Decr
 st.sidebar.title("Choose Encryption Type")
 mode = st.sidebar.selectbox("Select encryption method:", ["Symmetric Encryption", "Asymmetric Encryption (RSA)", "Hybrid Encryption"])
 
-# --- UI FUNCTIONS ---
+def copy_to_clipboard(label, value, key=None):
+    """Show a code box with copy button using HTML/JS (works in most browsers)."""
+    st.text_input(f"{label}", value, key=key or label, type="password" if "key" in label.lower() else "default")
+    # Show a code block for copy, not password-masked.
+    st.code(value, language="text")
+    # Button and JS for copying
+    btn = st.button(f"Copy {label}", key=f"copy_{key or label}")
+    if btn:
+        st.markdown(
+            f"""
+            <script>
+                navigator.clipboard.writeText({json.dumps(value)});
+            </script>
+            <span style="color:green">Copied to clipboard!</span>
+            """,
+            unsafe_allow_html=True
+        )
+
 def symmetric_encryption_ui():
     st.subheader("🔑 Symmetric Encryption (XOR)")
 
-    st.markdown("**Enter Secret Key (for Encryption):**")
-    key_encrypt = st.text_input("", key="sym_key_encrypt", type="password", help="Type your secret key here for encryption")
-    st.markdown("**Enter Message:**")
-    message = st.text_area("", key="sym_msg")
+    # --- Encryption Section ---
+    st.markdown("### Encryption")
+    key_encrypt = st.text_input("Enter Secret Key for Encryption", key="sym_key_encrypt", type="password")
+    # Copy button for secret key (encryption)
+    if key_encrypt:
+        if st.button("Copy Encryption Key", key="copy_encrypt_key"):
+            st.code(key_encrypt, language="text")
+            st.markdown(
+                f"""
+                <script>
+                    navigator.clipboard.writeText({json.dumps(key_encrypt)});
+                </script>
+                <span style="color:green">Copied to clipboard!</span>
+                """,
+                unsafe_allow_html=True
+            )
 
-    st.markdown("---")
-    st.markdown("**Enter Secret Key (for Decryption):**")
-    key_decrypt = st.text_input("", key="sym_key_decrypt", type="password", help="Type your secret key here for decryption")
-    st.markdown("**Enter Encrypted Message (Ciphertext):**")
-    ciphertext = st.text_area("", key="sym_ciphertext", help="Paste your encrypted message here to decrypt")
+    message = st.text_area("Enter Message", key="sym_msg")
+    # Copy button for message
+    if message:
+        if st.button("Copy Message", key="copy_message"):
+            st.code(message, language="text")
+            st.markdown(
+                f"""
+                <script>
+                    navigator.clipboard.writeText({json.dumps(message)});
+                </script>
+                <span style="color:green">Copied to clipboard!</span>
+                """,
+                unsafe_allow_html=True
+            )
 
     encrypt_clicked = st.button("Encrypt", key="sym_encrypt")
-    decrypt_clicked = st.button("Decrypt", key="sym_decrypt")
-
+    encrypted = None
     if encrypt_clicked:
         if not key_encrypt or not message:
-            st.error("Please enter both secret key (encryption) and message.")
+            st.error("Please enter both secret key and message.")
         else:
             cipher = SimpleSymmetricEncryption(key_encrypt)
             encrypted = cipher.encrypt(message)
             st.success("✅ Encrypted Message:")
             st.code(encrypted, language="text")
 
+    st.markdown("---")
+
+    # --- Decryption Section ---
+    st.markdown("### Decryption")
+    key_decrypt = st.text_input("Enter Secret Key for Decryption", key="sym_key_decrypt", type="password")
+    ciphertext = st.text_area("Enter Encrypted Message", key="sym_ciphertext")
+
+    decrypt_clicked = st.button("Decrypt", key="sym_decrypt")
     if decrypt_clicked:
         if not key_decrypt or not ciphertext:
-            st.error("Please enter both secret key (decryption) and ciphertext.")
+            st.error("Please enter both secret key and encrypted message.")
         else:
             cipher = SimpleSymmetricEncryption(key_decrypt)
             try:
@@ -168,11 +213,9 @@ def symmetric_encryption_ui():
             except Exception:
                 st.error("Decryption failed! Possibly wrong key or invalid ciphertext.")
 
-
 def asymmetric_encryption_ui():
     st.subheader("🔐 Asymmetric Encryption (RSA)")
 
-    # Use session state to persist generated keys
     if "rsa_public_key" not in st.session_state or "rsa_private_key" not in st.session_state:
         rsa = SimpleRSA()
         public_key, private_key = rsa.generate_keypair()
@@ -207,7 +250,6 @@ def asymmetric_encryption_ui():
         except Exception:
             st.error("Invalid encrypted data format.")
 
-
 def hybrid_encryption_ui():
     st.subheader("🧩 Hybrid Encryption")
 
@@ -233,8 +275,6 @@ def hybrid_encryption_ui():
         st.session_state["hybrid_encrypted_data"] = encrypted_data
         st.success("✅ Encrypted Data:")
         st.json(encrypted_data)
-
-        # Display JSON in code block for manual copying
         encrypted_json = json.dumps(encrypted_data, indent=2)
         st.code(encrypted_json, language="json")
 
@@ -250,8 +290,6 @@ def hybrid_encryption_ui():
         except Exception:
             st.error("Invalid JSON or decryption error.")
 
-
-# --- MAIN DRIVER ---
 if mode == "Symmetric Encryption":
     symmetric_encryption_ui()
 elif mode == "Asymmetric Encryption (RSA)":
