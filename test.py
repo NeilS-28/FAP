@@ -222,10 +222,20 @@ def hybrid_encryption_ui():
         st.success("✅ Encrypted Data:")
         st.json(encrypted_data)
 
-        # Add separate copy button for the JSON data
-        if st.button("Copy Encrypted Data JSON", key="hybrid_copy_json"):
-            st.code(json.dumps(encrypted_data, indent=2), language="json")
-            st.info("You can copy the JSON above.")
+        # Add separate copy button for the JSON data with JS copy-to-clipboard
+        encrypted_json = json.dumps(encrypted_data, indent=2)
+        copy_button = st.button("Copy Encrypted Data JSON", key="hybrid_copy_json")
+        st.code(encrypted_json, language="json")
+        if copy_button:
+            st.markdown(
+                f"""
+                <script>
+                navigator.clipboard.writeText({json.dumps(encrypted_json)});
+                </script>
+                <span style="color:green">Copied to clipboard!</span>
+                """,
+                unsafe_allow_html=True,
+            )
 
     encrypted_input = st.text_area("Paste Encrypted JSON:", key="hybrid_inp")
     decrypt_clicked = st.button("Hybrid Decrypt", key="hybrid_decrypt")
