@@ -129,15 +129,17 @@ st.markdown("<h1 style='text-align:center;color:#1f77b4;'>🔐 Encryption & Decr
 st.sidebar.title("Choose Encryption Type")
 mode = st.sidebar.selectbox("Select encryption method:", ["Symmetric Encryption", "Asymmetric Encryption (RSA)", "Hybrid Encryption"])
 
-
 # --- UI FUNCTIONS ---
 def symmetric_encryption_ui():
     st.subheader("🔑 Symmetric Encryption (XOR)")
 
-    key = st.text_input("Enter Secret Key:")
-    message = st.text_area("Enter Message:")
+    key = st.text_input("Enter Secret Key:", key="sym_key")
+    message = st.text_area("Enter Message:", key="sym_msg")
 
-    if st.button("Encrypt"):
+    encrypt_clicked = st.button("Encrypt", key="sym_encrypt")
+    decrypt_clicked = st.button("Decrypt", key="sym_decrypt")
+
+    if encrypt_clicked:
         if not key or not message:
             st.error("Please enter both key and message.")
         else:
@@ -146,7 +148,7 @@ def symmetric_encryption_ui():
             st.success("✅ Encrypted Message:")
             st.code(encrypted, language="text")
 
-    if st.button("Decrypt"):
+    if decrypt_clicked:
         if not key or not message:
             st.error("Please enter both key and ciphertext.")
         else:
@@ -158,58 +160,78 @@ def symmetric_encryption_ui():
             except Exception:
                 st.error("Decryption failed! Possibly wrong key or invalid ciphertext.")
 
-
 def asymmetric_encryption_ui():
     st.subheader("🔐 Asymmetric Encryption (RSA)")
 
-    rsa = SimpleRSA()
-    public_key, private_key = rsa.generate_keypair()
+    # Use session state to persist generated keys
+    if "rsa_public_key" not in st.session_state or "rsa_private_key" not in st.session_state:
+        rsa = SimpleRSA()
+        public_key, private_key = rsa.generate_keypair()
+        st.session_state["rsa_public_key"] = public_key
+        st.session_state["rsa_private_key"] = private_key
+
+    public_key = st.session_state["rsa_public_key"]
+    private_key = st.session_state["rsa_private_key"]
+
     st.write("🔸 Public Key:", public_key)
     st.write("🔸 Private Key:", private_key)
 
-    message = st.text_area("Enter Message:")
+    message = st.text_area("Enter Message:", key="rsa_msg")
 
-    if st.button("Encrypt with Public Key"):
+    encrypt_clicked = st.button("Encrypt with Public Key", key="rsa_encrypt")
+    if encrypt_clicked:
+        rsa = SimpleRSA()
         encrypted = rsa.encrypt(message, public_key)
         st.success("✅ Encrypted Message (Numbers):")
         st.code(json.dumps(encrypted), language="json")
 
-    encrypted_input = st.text_area("Paste Encrypted Message (JSON List):")
-    if st.button("Decrypt with Private Key"):
+    encrypted_input = st.text_area("Paste Encrypted Message (JSON List):", key="rsa_inp")
+    decrypt_clicked = st.button("Decrypt with Private Key", key="rsa_decrypt")
+    if decrypt_clicked:
         try:
             encrypted_list = json.loads(encrypted_input)
+            rsa = SimpleRSA()
             decrypted = rsa.decrypt(encrypted_list, private_key)
             st.success("✅ Decrypted Message:")
             st.code(decrypted, language="text")
         except Exception:
             st.error("Invalid encrypted data format.")
 
-
 def hybrid_encryption_ui():
     st.subheader("🧩 Hybrid Encryption")
 
-    hybrid = HybridEncryption()
-    public_key, private_key = hybrid.rsa.generate_keypair()
+    if "hybrid_public_key" not in st.session_state or "hybrid_private_key" not in st.session_state:
+        hybrid = HybridEncryption()
+        public_key, private_key = hybrid.rsa.generate_keypair()
+        st.session_state["hybrid_public_key"] = public_key
+        st.session_state["hybrid_private_key"] = private_key
+
+    public_key = st.session_state["hybrid_public_key"]
+    private_key = st.session_state["hybrid_private_key"]
+
     st.write("🔹 Public Key:", public_key)
     st.write("🔹 Private Key:", private_key)
 
-    message = st.text_area("Enter Message:")
+    message = st.text_area("Enter Message:", key="hybrid_msg")
 
-    if st.button("Hybrid Encrypt"):
+    encrypt_clicked = st.button("Hybrid Encrypt", key="hybrid_encrypt")
+    if encrypt_clicked:
+        hybrid = HybridEncryption()
         encrypted_data = hybrid.hybrid_encrypt(message, public_key)
         st.success("✅ Encrypted Data:")
         st.json(encrypted_data)
 
-    encrypted_input = st.text_area("Paste Encrypted JSON:")
-    if st.button("Hybrid Decrypt"):
+    encrypted_input = st.text_area("Paste Encrypted JSON:", key="hybrid_inp")
+    decrypt_clicked = st.button("Hybrid Decrypt", key="hybrid_decrypt")
+    if decrypt_clicked:
         try:
             encrypted_data = json.loads(encrypted_input)
+            hybrid = HybridEncryption()
             decrypted = hybrid.hybrid_decrypt(encrypted_data, private_key)
             st.success("✅ Decrypted Message:")
             st.code(decrypted, language="text")
         except Exception:
             st.error("Invalid JSON or decryption error.")
-
 
 # --- MAIN DRIVER ---
 if mode == "Symmetric Encryption":
