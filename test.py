@@ -133,8 +133,10 @@ mode = st.sidebar.selectbox("Select encryption method:", ["Symmetric Encryption"
 def symmetric_encryption_ui():
     st.subheader("🔑 Symmetric Encryption (XOR)")
 
-    key = st.text_input("Enter Secret Key:", key="sym_key")
-    message = st.text_area("Enter Message:", key="sym_msg")
+    st.markdown("**Enter Secret Key:**")
+    key = st.text_input("", key="sym_key", type="password", help="Type your secret key here")
+    st.markdown("**Enter Message:**")
+    message = st.text_area("", key="sym_msg")
 
     encrypt_clicked = st.button("Encrypt", key="sym_encrypt")
     decrypt_clicked = st.button("Decrypt", key="sym_decrypt")
@@ -177,7 +179,8 @@ def asymmetric_encryption_ui():
     st.write("🔸 Public Key:", public_key)
     st.write("🔸 Private Key:", private_key)
 
-    message = st.text_area("Enter Message:", key="rsa_msg")
+    st.markdown("**Enter Message:**")
+    message = st.text_area("", key="rsa_msg")
 
     encrypt_clicked = st.button("Encrypt with Public Key", key="rsa_encrypt")
     if encrypt_clicked:
@@ -214,7 +217,8 @@ def hybrid_encryption_ui():
     st.write("🔹 Public Key:", public_key)
     st.write("🔹 Private Key:", private_key)
 
-    message = st.text_area("Enter Message:", key="hybrid_msg")
+    st.markdown("**Enter Message:**")
+    message = st.text_area("", key="hybrid_msg")
 
     encrypt_clicked = st.button("Hybrid Encrypt", key="hybrid_encrypt")
     if encrypt_clicked:
@@ -224,7 +228,7 @@ def hybrid_encryption_ui():
         st.success("✅ Encrypted Data:")
         st.json(encrypted_data)
 
-        # Just display the JSON (no copy button)
+        # Display JSON in code block for manual copying
         encrypted_json = json.dumps(encrypted_data, indent=2)
         st.code(encrypted_json, language="json")
 
