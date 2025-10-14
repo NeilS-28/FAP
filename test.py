@@ -247,7 +247,7 @@ def hybrid_encryption_ui():
             st.success("✅ Decrypted Message:")
             st.code(decrypted, language="text")
         except Exception:
-            st.error("Invalid JSON or decryption error."
+            st.error("Invalid JSON or decryption error.")
 
 # --- MAIN DRIVER ---
 if mode == "Symmetric Encryption":
@@ -256,5 +256,6 @@ elif mode == "Asymmetric Encryption (RSA)":
     asymmetric_encryption_ui()
 else:
     hybrid_encryption_ui()
+
 
 
