@@ -197,7 +197,7 @@ def asymmetric_encryption_ui():
         except Exception:
             st.error("Invalid encrypted data format.")
 
-def hybrid_encryption_ui():
+'''def hybrid_encryption_ui():
     st.subheader("🧩 Hybrid Encryption")
 
     if "hybrid_public_key" not in st.session_state or "hybrid_private_key" not in st.session_state:
@@ -247,7 +247,7 @@ def hybrid_encryption_ui():
             st.success("✅ Decrypted Message:")
             st.code(decrypted, language="text")
         except Exception:
-            st.error("Invalid JSON or decryption error.")
+            st.error("Invalid JSON or decryption error.")'''
 
 # --- MAIN DRIVER ---
 if mode == "Symmetric Encryption":
@@ -256,3 +256,4 @@ elif mode == "Asymmetric Encryption (RSA)":
     asymmetric_encryption_ui()
 else:
     hybrid_encryption_ui()
+
