@@ -218,8 +218,14 @@ def hybrid_encryption_ui():
     if encrypt_clicked:
         hybrid = HybridEncryption()
         encrypted_data = hybrid.hybrid_encrypt(message, public_key)
+        st.session_state["hybrid_encrypted_data"] = encrypted_data
         st.success("✅ Encrypted Data:")
         st.json(encrypted_data)
+
+        # Add separate copy button for the JSON data
+        if st.button("Copy Encrypted Data JSON", key="hybrid_copy_json"):
+            st.code(json.dumps(encrypted_data, indent=2), language="json")
+            st.info("You can copy the JSON above.")
 
     encrypted_input = st.text_area("Paste Encrypted JSON:", key="hybrid_inp")
     decrypt_clicked = st.button("Hybrid Decrypt", key="hybrid_decrypt")
