@@ -212,6 +212,19 @@ def asymmetric_encryption_ui():
         st.success("✅ Encrypted Message (Numbers):")
         st.code(json.dumps(encrypted), language="json")
 
+    st.markdown("**Paste Encrypted Data (Numbers, JSON list):**")
+    encrypted_numbers_input = st.text_area("", key="rsa_encrypted_numbers")
+    decrypt_numbers_clicked = st.button("Decrypt Numbers with Private Key", key="rsa_decrypt_numbers")
+    if decrypt_numbers_clicked:
+        try:
+            encrypted_numbers = json.loads(encrypted_numbers_input)
+            rsa = SimpleRSA()
+            decrypted = rsa.decrypt(encrypted_numbers, private_key)
+            st.success("✅ Decrypted Message from Numbers:")
+            st.code(decrypted, language="text")
+        except Exception:
+            st.error("Invalid encrypted data format or not a JSON list of numbers.")
+
     encrypted_input = st.text_area("Paste Encrypted Message (JSON List):", key="rsa_inp")
     decrypt_clicked = st.button("Decrypt with Private Key", key="rsa_decrypt")
     if decrypt_clicked:
