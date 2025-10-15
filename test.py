@@ -188,7 +188,19 @@ def asymmetric_encryption_ui():
     private_key = st.session_state["rsa_private_key"]
 
     st.write("🔸 Public Key:", public_key)
-    st.write("🔸 Private Key:", private_key)
+
+    # --- Show/mask private key ---
+    if "show_private_key_asym" not in st.session_state:
+        st.session_state["show_private_key_asym"] = False
+
+    if not st.session_state["show_private_key_asym"]:
+        pk_str = str(private_key)
+        st.write("🔸 Private Key:", "•" * len(pk_str))
+    else:
+        st.write("🔸 Private Key:", private_key)
+    # Button to reveal/hide private key (directly under key)
+    if st.button("Show Private Key" if not st.session_state["show_private_key_asym"] else "Hide Private Key", key="show_private_key_asym_button"):
+        st.session_state["show_private_key_asym"] = not st.session_state["show_private_key_asym"]
 
     st.markdown("**Enter Message:**")
     message = st.text_area("", key="rsa_msg")
