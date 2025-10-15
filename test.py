@@ -129,24 +129,6 @@ st.markdown("<h1 style='text-align:center;color:#1f77b4;'>🔐 Encryption & Decr
 st.sidebar.title("Choose Encryption Type")
 mode = st.sidebar.selectbox("Select encryption method:", ["Symmetric Encryption", "Asymmetric Encryption (RSA)", "Hybrid Encryption"])
 
-def copy_to_clipboard(label, value, key=None):
-    """Show a code box with copy button using HTML/JS (works in most browsers)."""
-    st.text_input(f"{label}", value, key=key or label, type="password" if "key" in label.lower() else "default")
-    # Show a code block for copy, not password-masked.
-    st.code(value, language="text")
-    # Button and JS for copying
-    btn = st.button(f"Copy {label}", key=f"copy_{key or label}")
-    if btn:
-        st.markdown(
-            f"""
-            <script>
-                navigator.clipboard.writeText({json.dumps(value)});
-            </script>
-            <span style="color:green">Copied to clipboard!</span>
-            """,
-            unsafe_allow_html=True
-        )
-
 def symmetric_encryption_ui():
     st.subheader("🔑 Symmetric Encryption (XOR)")
 
@@ -155,14 +137,14 @@ def symmetric_encryption_ui():
     key_encrypt = st.text_input("Enter Secret Key for Encryption", key="sym_key_encrypt", type="password")
     # Copy button for secret key (encryption)
     if key_encrypt:
+        st.code(key_encrypt, language="text")
         if st.button("Copy Encryption Key", key="copy_encrypt_key"):
-            st.code(key_encrypt, language="text")
             st.markdown(
                 f"""
                 <script>
                     navigator.clipboard.writeText({json.dumps(key_encrypt)});
                 </script>
-                <span style="color:green">Copied to clipboard!</span>
+                <span style="color:green">Encryption key copied to clipboard!</span>
                 """,
                 unsafe_allow_html=True
             )
@@ -170,14 +152,14 @@ def symmetric_encryption_ui():
     message = st.text_area("Enter Message", key="sym_msg")
     # Copy button for message
     if message:
+        st.code(message, language="text")
         if st.button("Copy Message", key="copy_message"):
-            st.code(message, language="text")
             st.markdown(
                 f"""
                 <script>
                     navigator.clipboard.writeText({json.dumps(message)});
                 </script>
-                <span style="color:green">Copied to clipboard!</span>
+                <span style="color:green">Message copied to clipboard!</span>
                 """,
                 unsafe_allow_html=True
             )
@@ -192,6 +174,16 @@ def symmetric_encryption_ui():
             encrypted = cipher.encrypt(message)
             st.success("✅ Encrypted Message:")
             st.code(encrypted, language="text")
+            if st.button("Copy Encrypted Message", key="copy_encrypted_message"):
+                st.markdown(
+                    f"""
+                    <script>
+                        navigator.clipboard.writeText({json.dumps(encrypted)});
+                    </script>
+                    <span style="color:green">Encrypted message copied to clipboard!</span>
+                    """,
+                    unsafe_allow_html=True
+                )
 
     st.markdown("---")
 
