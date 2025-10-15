@@ -225,7 +225,14 @@ def hybrid_encryption_ui():
     private_key = st.session_state["hybrid_private_key"]
 
     st.write("🔹 Public Key:", public_key)
-    st.write("🔹 Private Key:", private_key)
+    # Private key: show as dots by default, with option to reveal
+    show_private_key = st.checkbox("Show Private Key", key="show_private_key")
+    if show_private_key:
+        st.write("🔹 Private Key:", private_key)
+    else:
+        # Mask the private key as dots
+        pk_str = str(private_key)
+        st.write("🔹 Private Key:", "•" * len(pk_str))
 
     st.markdown("**Enter Message:**")
     message = st.text_area("", key="hybrid_msg")
