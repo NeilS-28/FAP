@@ -129,26 +129,6 @@ st.markdown("<h1 style='text-align:center;color:#1f77b4;'>🔐 Encryption & Decr
 st.sidebar.title("Choose Encryption Type")
 mode = st.sidebar.selectbox("Select encryption method:", ["Symmetric Encryption", "Asymmetric Encryption (RSA)", "Hybrid Encryption"])
 
-def small_copy_button(text, key):
-    st.markdown(
-        f"""
-        <button id="copy_{key}" style="font-size:11px;padding:1px 8px;margin-left:5px;float:right;border-radius:4px;border:1px solid #ccc;background:#eee;cursor:pointer;">
-            📋
-        </button>
-        <script>
-        const btn = document.getElementById("copy_{key}");
-        if (btn) {{
-            btn.onclick = function() {{
-                navigator.clipboard.writeText({json.dumps(text)});
-                btn.innerText = "✔";
-                setTimeout(() => btn.innerText = "📋", 900);
-            }}
-        }}
-        </script>
-        """,
-        unsafe_allow_html=True
-    )
-
 def symmetric_encryption_ui():
     st.subheader("🔑 Symmetric Encryption (XOR)")
 
@@ -156,12 +136,6 @@ def symmetric_encryption_ui():
     st.markdown("### Encryption")
     key_encrypt = st.text_input("Enter Secret Key for Encryption", key="sym_key_encrypt", type="password")
     message = st.text_area("Enter Message", key="sym_msg")
-
-    # Place copy button at the end of the textbox (right)
-    if key_encrypt:
-        small_copy_button(key_encrypt, "key_encrypt")
-    if message:
-        small_copy_button(message, "message_encrypt")
 
     encrypt_clicked = st.button("Encrypt", key="sym_encrypt")
     encrypted = None
@@ -173,7 +147,6 @@ def symmetric_encryption_ui():
             encrypted = cipher.encrypt(message)
             st.success("✅ Encrypted Message:")
             st.code(encrypted, language="text")
-            small_copy_button(encrypted, "encrypted_msg")
 
     st.markdown("---")
 
@@ -181,11 +154,6 @@ def symmetric_encryption_ui():
     st.markdown("### Decryption")
     key_decrypt = st.text_input("Enter Secret Key for Decryption", key="sym_key_decrypt", type="password")
     ciphertext = st.text_area("Enter Encrypted Message", key="sym_ciphertext")
-
-    if key_decrypt:
-        small_copy_button(key_decrypt, "key_decrypt")
-    if ciphertext:
-        small_copy_button(ciphertext, "ciphertext_decrypt")
 
     decrypt_clicked = st.button("Decrypt", key="sym_decrypt")
     if decrypt_clicked:
@@ -197,7 +165,6 @@ def symmetric_encryption_ui():
                 decrypted = cipher.decrypt(ciphertext)
                 st.success("✅ Decrypted Message:")
                 st.code(decrypted, language="text")
-                small_copy_button(decrypted, "decrypted_msg")
             except Exception:
                 st.error("Decryption failed! Possibly wrong key or invalid ciphertext.")
 
