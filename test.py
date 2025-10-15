@@ -137,23 +137,30 @@ def symmetric_encryption_ui():
     key_encrypt = st.text_input("Enter Secret Key for Encryption", key="sym_key_encrypt", type="password")
     message = st.text_area("Enter Message", key="sym_msg")
 
+    # Use session state to keep encrypted message visible after decryption key entry
+    if 'encrypted_message' not in st.session_state:
+        st.session_state['encrypted_message'] = ""
+
     encrypt_clicked = st.button("Encrypt", key="sym_encrypt")
-    encrypted = None
     if encrypt_clicked:
         if not key_encrypt or not message:
             st.error("Please enter both secret key and message.")
         else:
             cipher = SimpleSymmetricEncryption(key_encrypt)
             encrypted = cipher.encrypt(message)
+            st.session_state['encrypted_message'] = encrypted
             st.success("✅ Encrypted Message:")
             st.code(encrypted, language="text")
+    elif st.session_state['encrypted_message']:  # Show the last encrypted message if present
+        st.success("✅ Encrypted Message:")
+        st.code(st.session_state['encrypted_message'], language="text")
 
     st.markdown("---")
 
     # --- Decryption Section ---
     st.markdown("### Decryption")
     key_decrypt = st.text_input("Enter Secret Key for Decryption", key="sym_key_decrypt", type="password")
-    ciphertext = st.text_area("Enter Encrypted Message", key="sym_ciphertext")
+    ciphertext = st.text_area("Enter Encrypted Message", key="sym_ciphertext", value=st.session_state['encrypted_message'])
 
     decrypt_clicked = st.button("Decrypt", key="sym_decrypt")
     if decrypt_clicked:
