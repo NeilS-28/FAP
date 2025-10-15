@@ -225,18 +225,6 @@ def asymmetric_encryption_ui():
         except Exception:
             st.error("Invalid encrypted data format or not a JSON list of numbers.")
 
-    encrypted_input = st.text_area("Paste Encrypted Message (JSON List):", key="rsa_inp")
-    decrypt_clicked = st.button("Decrypt with Private Key", key="rsa_decrypt")
-    if decrypt_clicked:
-        try:
-            encrypted_list = json.loads(encrypted_input)
-            rsa = SimpleRSA()
-            decrypted = rsa.decrypt(encrypted_list, private_key)
-            st.success("✅ Decrypted Message:")
-            st.code(decrypted, language="text")
-        except Exception:
-            st.error("Invalid encrypted data format.")
-
 def hybrid_encryption_ui():
     st.subheader("🧩 Hybrid Encryption")
 
