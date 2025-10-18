@@ -366,7 +366,6 @@ def hybrid_encryption_ui():
         encrypted_data = hybrid.hybrid_encrypt(message, public_key)
         st.session_state["hybrid_encrypted_data"] = encrypted_data
         st.success("✅ Encrypted Data:")
-#        st.json(encrypted_data)
         encrypted_json = json.dumps(encrypted_data, indent=2)
         st.code(encrypted_json, language="json")
 
@@ -390,6 +389,7 @@ elif mode == "Asymmetric Encryption (RSA)":
     asymmetric_encryption_ui()
 else:
     hybrid_encryption_ui()
+
 
 
 
