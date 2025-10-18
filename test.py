@@ -228,7 +228,7 @@ mode = st.sidebar.selectbox("Select encryption method:", ["Symmetric Encryption 
 
 # --- UI FUNCTIONS ---
 def symmetric_encryption_ui():
-    st.subheader("🔑 Symmetric Encryption")
+    st.subheader("🔑 Symmetric Encryption (AES-256)")
 
     if not AES_AVAILABLE:
         st.warning(
@@ -390,4 +390,5 @@ elif mode == "Asymmetric Encryption (RSA)":
     asymmetric_encryption_ui()
 else:
     hybrid_encryption_ui()
+
 
