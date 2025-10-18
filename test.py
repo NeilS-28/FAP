@@ -3,34 +3,96 @@ import base64
 import random
 from typing import Tuple
 import json
+import os
+
+# New imports for AES-256 (cryptography)
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 # =======================
 # Encryption Classes
 # =======================
 class SimpleSymmetricEncryption:
-    """Simple symmetric encryption using XOR cipher (for demonstration)"""
+    """AES-256 GCM symmetric encryption using a password-derived key (PBKDF2).
+
+    Behaviour:
+    - The user still supplies a text "key" (password) in the UI as before.
+    - For encryption, a random salt (16 bytes) and a random nonce (12 bytes) are generated.
+    - A 32-byte key is derived from the password using PBKDF2-HMAC-SHA256.
+    - AES-GCM (authenticated) is used to encrypt; the resulting ciphertext (which includes the tag)
+      plus the salt and nonce are returned as a JSON string:
+        {"salt": "<b64>", "nonce": "<b64>", "ciphertext": "<b64>"}
+    - decrypt() expects that JSON string and performs the reverse derivation and AES-GCM decrypt.
+    - This keeps the external API (encrypt/decrypt taking/returning str) unchanged for the rest of the app/UI.
+    """
+
+    # PBKDF2 parameters
+    _PBKDF2_ITERATIONS = 390000  # reasonably strong default; adjust as needed
+    _SALT_SIZE = 16
+    _NONCE_SIZE = 12  # recommended for AESGCM
 
     def __init__(self, key: str):
-        self.key = key.encode('utf-8')
+        # keep the provided string and also store its bytes form for KDF
+        if not isinstance(key, str):
+            raise TypeError("key must be a string")
+        self.password = key.encode('utf-8')  # used for PBKDF2
 
-    def _extend_key(self, data_length: int) -> bytes:
-        """Extend key to match data length"""
-        extended_key = (self.key * (data_length // len(self.key) + 1))[:data_length]
-        return extended_key
+    def _derive_key(self, salt: bytes) -> bytes:
+        """Derive a 32-byte AES key from the password and salt using PBKDF2-HMAC-SHA256."""
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,  # 256 bits
+            salt=salt,
+            iterations=self._PBKDF2_ITERATIONS,
+        )
+        return kdf.derive(self.password)
 
     def encrypt(self, plaintext: str) -> str:
-        """Encrypt plaintext using XOR"""
-        data = plaintext.encode('utf-8')
-        extended_key = self._extend_key(len(data))
-        encrypted = bytes(a ^ b for a, b in zip(data, extended_key))
-        return base64.b64encode(encrypted).decode('utf-8')
+        """Encrypt plaintext using AES-256-GCM.
+
+        Returns a JSON string containing base64-encoded salt, nonce and ciphertext.
+        """
+        if not isinstance(plaintext, str):
+            raise TypeError("plaintext must be a string")
+
+        # Generate salt and derive key
+        salt = os.urandom(self._SALT_SIZE)
+        key = self._derive_key(salt)
+
+        # Generate nonce and encrypt
+        nonce = os.urandom(self._NONCE_SIZE)
+        aesgcm = AESGCM(key)
+        ct = aesgcm.encrypt(nonce, plaintext.encode('utf-8'), associated_data=None)
+
+        payload = {
+            "salt": base64.b64encode(salt).decode('utf-8'),
+            "nonce": base64.b64encode(nonce).decode('utf-8'),
+            "ciphertext": base64.b64encode(ct).decode('utf-8'),
+        }
+        return json.dumps(payload)
 
     def decrypt(self, ciphertext: str) -> str:
-        """Decrypt ciphertext using XOR"""
-        encrypted_data = base64.b64decode(ciphertext.encode('utf-8'))
-        extended_key = self._extend_key(len(encrypted_data))
-        decrypted = bytes(a ^ b for a, b in zip(encrypted_data, extended_key))
-        return decrypted.decode('utf-8')
+        """Decrypt the JSON string produced by encrypt() and return the plaintext string."""
+        if not isinstance(ciphertext, str):
+            raise TypeError("ciphertext must be a string")
+
+        try:
+            payload = json.loads(ciphertext)
+            salt = base64.b64decode(payload['salt'])
+            nonce = base64.b64decode(payload['nonce'])
+            ct = base64.b64decode(payload['ciphertext'])
+        except Exception as e:
+            raise ValueError("Invalid ciphertext format. Expected JSON with salt/nonce/ciphertext.") from e
+
+        key = self._derive_key(salt)
+        aesgcm = AESGCM(key)
+        try:
+            pt = aesgcm.decrypt(nonce, ct, associated_data=None)
+            return pt.decode('utf-8')
+        except Exception as e:
+            # Bubble up a clear error for the UI to catch
+            raise ValueError("Decryption failed. Wrong password or corrupted ciphertext.") from e
 
 
 class SimpleRSA:
@@ -122,18 +184,18 @@ class HybridEncryption:
 # =======================
 # Streamlit App UI
 # =======================
-
 st.set_page_config(page_title="Encryption & Decryption App", page_icon="🔐", layout="wide")
 
 st.markdown("<h1 style='text-align:center;color:#1f77b4;'>🔐 Encryption & Decryption App</h1>", unsafe_allow_html=True)
+
 st.sidebar.title("Choose Encryption Type")
-mode = st.sidebar.selectbox("Select encryption method:", ["Symmetric Encryption", "Asymmetric Encryption (RSA)", "Hybrid Encryption"])
+mode = st.sidebar.selectbox("Select encryption method:", ["Symmetric Encryption (AES-256)", "Asymmetric Encryption (RSA)", "Hybrid Encryption"])
 
+
+# --- UI FUNCTIONS ---
 def symmetric_encryption_ui():
-    st.subheader("🔑 Symmetric Encryption (XOR)")
+    st.subheader("🔑 Symmetric Encryption (AES-256 GCM)")
 
-    # --- Encryption Section ---
-    st.markdown("### Encryption")
     key_encrypt = st.text_input("Enter Secret Key for Encryption", key="sym_key_encrypt", type="password")
     message = st.text_area("Enter Message", key="sym_msg")
 
@@ -175,9 +237,11 @@ def symmetric_encryption_ui():
             except Exception:
                 st.error("Decryption failed! Possibly wrong key or invalid ciphertext.")
 
+
 def asymmetric_encryption_ui():
     st.subheader("🔐 Asymmetric Encryption (RSA)")
 
+    # Use session state to persist generated keys
     if "rsa_public_key" not in st.session_state or "rsa_private_key" not in st.session_state:
         rsa = SimpleRSA()
         public_key, private_key = rsa.generate_keypair()
@@ -224,6 +288,7 @@ def asymmetric_encryption_ui():
             st.code(decrypted, language="text")
         except Exception:
             st.error("Invalid encrypted data format or not a JSON list of numbers.")
+
 
 def hybrid_encryption_ui():
     st.subheader("🧩 Hybrid Encryption")
@@ -277,7 +342,9 @@ def hybrid_encryption_ui():
         except Exception:
             st.error("Invalid JSON or decryption error.")
 
-if mode == "Symmetric Encryption":
+
+# --- MAIN DRIVER ---
+if mode == "Symmetric Encryption (AES-256)":
     symmetric_encryption_ui()
 elif mode == "Asymmetric Encryption (RSA)":
     asymmetric_encryption_ui()
