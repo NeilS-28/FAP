@@ -223,7 +223,7 @@ st.set_page_config(page_title="Encryption & Decryption App", page_icon="🔐", l
 st.markdown("<h1 style='text-align:center;color:#1f77b4;'>🔐 Encryption & Decryption App</h1>", unsafe_allow_html=True)
 
 st.sidebar.title("Choose Encryption Type")
-mode = st.sidebar.selectbox("Select encryption method:", ["Symmetric Encryption", "Asymmetric Encryption (RSA)", "Hybrid Encryption"])
+mode = st.sidebar.selectbox("Select encryption method:", ["Symmetric Encryption (AES-256)", "Asymmetric Encryption (RSA)", "Hybrid Encryption"])
 
 
 # --- UI FUNCTIONS ---
@@ -384,9 +384,10 @@ def hybrid_encryption_ui():
 
 
 # --- MAIN DRIVER ---
-if mode == "Symmetric Encryption":
+if mode == "Symmetric Encryption (AES-256)":
     symmetric_encryption_ui()
 elif mode == "Asymmetric Encryption (RSA)":
     asymmetric_encryption_ui()
 else:
     hybrid_encryption_ui()
+
